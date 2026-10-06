@@ -1,0 +1,7 @@
+*
+!Dockerfile
+!package.json
+!server.mjs
+!index.html
+!app.js
+!styles.css

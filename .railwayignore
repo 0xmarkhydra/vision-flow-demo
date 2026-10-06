@@ -1,0 +1,7 @@
+.env
+.env.*
+.railway-access.json
+.playwright-cli/
+output/
+test.mjs
+README.md

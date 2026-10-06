@@ -1,0 +1,6 @@
+.env
+.env.*
+!.env.example
+.railway-access.json
+.playwright-cli/
+output/

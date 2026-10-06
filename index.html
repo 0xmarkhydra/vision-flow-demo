@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BIDDI | Trải nghiệm AI đăng bán</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <nav class="topbar" aria-label="Thông tin demo">
+    <div class="brand">biddi<span>.</span></div>
+    <span class="nav-title">Không gian trải nghiệm AI</span>
+    <span class="demo-tag">Bản thử nghiệm</span>
+  </nav>
+  <main class="app-shell">
+    <header class="page-header">
+      <div>
+        <span class="eyebrow">Đăng bán thông minh</span>
+        <h1>Từ một bức ảnh, đến thông tin sản phẩm.</h1>
+        <p>Thử hai cách xử lý và xem người bán có thể bắt đầu sớm hơn bao lâu.</p>
+      </div>
+      <div id="apiStatus" class="server-status" role="status">Đang kết nối…</div>
+    </header>
+    <section class="setup-card" aria-label="Thiết lập trải nghiệm">
+      <div class="image-section">
+        <h2 class="step-title"><span>01</span> Chọn ảnh sản phẩm</h2>
+        <div class="image-picker">
+          <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden />
+          <div id="emptyPicker" class="empty-picker">
+            <svg class="picker-icon" width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true"><rect x="7" y="7" width="34" height="34" rx="6" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="18" r="3" stroke="currentColor" stroke-width="1.5"/><path d="m8 34 10-10 8 7 6-6 9 9" stroke="currentColor" stroke-width="1.5"/></svg>
+            <strong>Bắt đầu với một bức ảnh</strong>
+            <small>Ảnh rõ sản phẩm giúp AI nhận diện tốt hơn</small>
+          </div>
+          <img id="previewImage" class="preview-image hidden" alt="Ảnh sản phẩm đã chọn" />
+          <button id="chooseImageButton" class="secondary-button" type="button">Chọn ảnh từ thiết bị</button>
+        </div>
+        <div class="image-caption"><span>JPG, PNG, WEBP, GIF tĩnh · Tối đa 25 MB</span><span id="fileMeta">Chưa chọn ảnh</span></div>
+        <p id="fileError" class="error-message hidden" role="alert"></p>
+      </div>
+      <div class="run-settings">
+        <h2 class="step-title"><span>02</span> Chọn AI để trải nghiệm</h2>
+        <div class="model-row">
+          <div><strong>Cách hiện tại</strong><small>Chờ đủ thông tin rồi mới bắt đầu</small></div>
+          <code id="oldModelLabel">gpt-4o</code>
+        </div>
+        <div class="model-field">
+          <div class="phase-heading"><label for="phase1ModelSelect">Phase 1 · Cách mới</label><span class="phase-tag">Đang thử nghiệm</span></div>
+          <p>Có tên và danh mục trước. Chi tiết sản phẩm được bổ sung sau.</p>
+          <select id="phase1ModelSelect" aria-describedby="modelHelp">
+            <option value="gpt-4o">GPT-4o</option>
+            <option value="gpt-4o-mini">GPT-4o mini</option>
+            <option value="gpt-4.1">GPT-4.1</option>
+            <option value="gpt-4.1-mini">GPT-4.1 mini</option>
+            <option value="custom">Model khác…</option>
+          </select>
+          <div id="customModelField" class="hidden">
+            <label for="phase1ModelInput">Tên model tùy chỉnh</label>
+            <input id="phase1ModelInput" type="text" maxlength="100" placeholder="Ví dụ: gpt-4o" autocomplete="off" spellcheck="false" aria-describedby="modelError" />
+          </div>
+          <small id="modelHelp">Model là phiên bản AI. Chọn GPT-4o để so sánh hai cách với cùng AI. Khả dụng tùy tài khoản API.</small>
+          <p id="modelError" class="error-message hidden" role="alert"></p>
+        </div>
+        <button id="runButton" class="primary-button" type="button" disabled>Bắt đầu so sánh</button>
+        <p class="cost-note">Chỉ chạy khi bạn bấm nút. Mỗi lần chạy dùng tối đa 4 lượt gọi AI có tính phí.</p>
+        <p class="privacy-note">Ảnh được gửi tới OpenAI và lưu trên kho ảnh công khai BIDDI. Không dùng ảnh chứa thông tin nhạy cảm.</p>
+      </div>
+    </section>
+    <section class="results-section" aria-labelledby="resultsTitle" aria-busy="false">
+      <div class="results-heading"><h2 id="resultsTitle" class="step-title"><span>03</span> So sánh kết quả</h2><span id="resultContext">Kết quả sẽ xuất hiện tại đây</span></div>
+      <section id="decisionBanner" class="decision-banner idle" role="status" aria-live="polite">
+        <span class="decision-label">Điểm khác biệt</span>
+        <strong id="decisionText">Cùng một ảnh. Hai cách xử lý. Bạn đánh giá kết quả.</strong>
+      </section>
+      <section class="metrics-grid" aria-label="Thời gian xử lý">
+        <article class="metric-card"><span>Gửi ảnh</span><strong id="uploadMetric">—</strong><small>Dùng chung cho cả hai cách</small></article>
+        <article class="metric-card old"><span>Cách hiện tại · Bắt đầu sau</span><strong id="oldUsableMetric">—</strong><small>Chờ đủ thông tin sản phẩm</small></article>
+        <article class="metric-card new"><span>Phase 1 · Bắt đầu sau</span><strong id="newUsableMetric">—</strong><small>Có thông tin cơ bản là bắt đầu</small></article>
+        <article class="metric-card gain"><span>Thời gian tiết kiệm</span><strong id="savedMetric">—</strong><small>So với cách hiện tại</small></article>
+      </section>
+      <section class="comparison-grid" aria-label="Thông tin AI nhận diện">
+        <article class="flow-card old-flow">
+          <div class="flow-header"><div><span class="flow-label">Cách hiện tại</span><h3 id="oldModelDisplay">gpt-4o</h3></div><span id="oldStatus" class="status idle" role="status">Chưa chạy</span></div>
+          <div class="primary-time"><span>Có thể bắt đầu sau</span><strong id="oldFullTime">—</strong><small>Nhận đủ thông tin trong một lần chờ</small></div>
+          <div class="result-grid">
+            <div class="result-item wide"><span>Tên sản phẩm</span><strong id="oldProduct">—</strong></div>
+            <div class="result-item wide"><span>Danh mục</span><strong id="oldCategory">—</strong></div>
+            <div class="result-item"><span>Kiểm duyệt ảnh</span><strong id="oldModeration">—</strong></div>
+            <div class="result-item"><span>AI tự đánh giá độ tin cậy</span><strong id="oldConfidence">—</strong></div>
+            <div class="result-item wide"><span>Chi tiết nhận diện</span><div id="oldAttributes" class="attribute-list"><span class="muted">Chưa có thông tin</span></div></div>
+          </div>
+          <p id="oldError" class="error-message hidden" role="alert"></p>
+          <details class="technical-details"><summary>Dành cho đội kỹ thuật</summary><div class="stage-list">
+            <div><span>Upload</span><strong id="oldStageUpload">—</strong></div>
+            <div><span>AI basic/category</span><strong id="oldStageBasic">—</strong></div>
+            <div><span>Schema (mô phỏng)</span><strong id="oldStageSchema">—</strong></div>
+            <div><span>AI attributes</span><strong id="oldStageAttributes">—</strong></div>
+            <div><span>Validate (mô phỏng)</span><strong id="oldStageValidate">—</strong></div>
+          </div><pre id="oldRawResult">Chưa có dữ liệu.</pre></details>
+        </article>
+        <article class="flow-card new-flow">
+          <div class="flow-header"><div><span class="flow-label">Phase 1 · Cách mới</span><h3 id="newModelDisplay">—</h3></div><span id="newStatus" class="status idle" role="status">Chưa chạy</span></div>
+          <div class="phase-times">
+            <div class="primary-time highlight"><span>Có thể bắt đầu sau</span><strong id="newBasicTime">—</strong><small>Có tên và danh mục sản phẩm</small></div>
+            <div class="secondary-time"><span>Đủ mọi thông tin</span><strong id="newFullTime">—</strong></div>
+          </div>
+          <div class="result-grid">
+            <div class="result-item wide"><span>Tên sản phẩm</span><strong id="newProduct">—</strong></div>
+            <div class="result-item wide"><span>Danh mục</span><strong id="newCategory">—</strong></div>
+            <div class="result-item"><span>Kiểm duyệt ảnh</span><strong id="newModeration">—</strong></div>
+            <div class="result-item"><span>AI tự đánh giá độ tin cậy</span><strong id="newConfidence">—</strong></div>
+            <div class="result-item wide"><span>Chi tiết nhận diện</span><div id="newAttributes" class="attribute-list"><span class="muted">Được bổ sung sau thông tin cơ bản</span></div></div>
+          </div>
+          <p id="newError" class="error-message hidden" role="alert"></p>
+          <details class="technical-details"><summary>Dành cho đội kỹ thuật</summary><div class="stage-list">
+            <div><span>Upload</span><strong id="newStageUpload">—</strong></div>
+            <div><span>AI basic</span><strong id="newStageBasic">—</strong></div>
+            <div><span>Schema (mô phỏng)</span><strong id="newStageSchema">—</strong></div>
+            <div><span>AI attributes</span><strong id="newStageAttributes">—</strong></div>
+            <div><span>Validate (mô phỏng)</span><strong id="newStageValidate">—</strong></div>
+          </div><pre id="newRawResult">Chưa có dữ liệu.</pre></details>
+        </article>
+      </section>
+      <details class="explanation"><summary>Đọc kết quả này như thế nào?</summary>
+        <p>“Bắt đầu sau” là thời gian từ lúc gửi ảnh đến khi có đủ dữ liệu để bắt đầu điền thông tin. Demo đo mốc này, không mở biểu mẫu đăng bán thật. “Đủ mọi thông tin” bao gồm cả chi tiết được bổ sung sau.</p>
+        <p>AI và tải ảnh chạy thật; bước lấy cấu trúc danh mục và kiểm tra dữ liệu được mô phỏng (35 ms và 10 ms). Kết quả chỉ phản ánh lần thử này, không đại diện tốc độ hệ thống chính thức. Đổi model cũng làm thay đổi phép so sánh. Độ tin cậy do AI tự đánh giá, không phải độ chính xác đã kiểm chứng.</p>
+        <section id="uploadStrip" class="upload-strip hidden"><strong id="previewName"></strong><span id="previewSize"></span><span id="uploadInfo"></span><span id="imageUrlText" class="image-url"></span></section>
+      </details>
+    </section>
+    <footer>BIDDI / Trải nghiệm sản phẩm <span>AI gợi ý. Con người quyết định.</span></footer>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>
